@@ -1,0 +1,64 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title> Text Editor</title>
+    <link rel="stylesheet" href="styles.css"> <!-- Link to your CSS file -->
+    <!-- Include Monaco Editor styles -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.27.0/min/vs/editor/editor.main.css">
+    <style>
+        #editor {
+            width: 800px;
+            height: 600px;
+        }
+    </style>
+</head>
+<body>
+    <header>
+        <h1> Text Editor</h1>
+        <nav>
+            <ul>
+                <li><a href="/login">Login</a></li>
+                <li><a href="/logout">Logout</a></li>
+            </ul>
+        </nav>
+    </header>
+    <main>
+        <div id="editor"></div>
+        <div id="user-list">
+            <!-- Display list of online users -->
+        </div>
+    </main>
+
+    <!-- Include Socket.IO library -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/socket.io/4.0.1/socket.io.js"></script>
+    <!-- Include Monaco Editor scripts -->
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.27.0/min/vs/loader.js"></script>
+    <script>
+        require.config({ paths: { 'vs': 'https://cdnjs.cloudflare.com/ajax/libs/monaco-editor/0.27.0/min/vs' }});
+        require(['vs/editor/editor.main'], function() {
+            const editor = monaco.editor.create(document.getElementById('editor'), {
+                value: "",
+                language: "plaintext"
+            });
+
+            // Connect to the server using Socket.IO
+            const socket = io();
+
+            // Event listener for text changes
+            editor.onDidChangeModelContent(event => {
+                const text = editor.getValue();
+                // Emit the new text to the server
+                socket.emit('text-update', text);
+            });
+
+            // Event listener for receiving text updates from the server
+            socket.on('text-update', text => {
+                editor.setValue(text);
+            });
+        });
+    </script>
+    <script src="script.js"></script> <!-- Link to your JavaScript file -->
+</body>
+</html>
